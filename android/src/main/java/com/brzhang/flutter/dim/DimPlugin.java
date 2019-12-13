@@ -307,7 +307,36 @@ public class DimPlugin implements MethodCallHandler, EventChannel.StreamHandler 
                     result.success("sendTextMessages ok");
                 }
             });
-        } else if (call.method.equals("sendImageMessages")) {
+        } else if (call.method.equals("sendOnlineMessage")) {
+            String identifier = call.argument("identifier");
+            String content = call.argument("content");
+            TIMMessage msg = new TIMMessage();
+
+            //添加文本内容
+            TIMTextElem elem = new TIMTextElem();
+            elem.setText(content);
+
+            //将elem添加到消息
+            if (msg.addElement(elem) != 0) {
+                Log.d(TAG, "addElement failed");
+                return;
+            }
+            TIMConversation conversation = TIMManager.getInstance().getConversation(TIMConversationType.C2C, identifier);
+            //发送消息
+            conversation.sendOnlineMessage(msg, new TIMValueCallBack<TIMMessage>() {//发送消息回调
+                @Override
+                public void onError(int code, String desc) {//发送消息失败
+                    Log.d(TAG, "send message failed. code: " + code + " errmsg: " + desc);
+                    result.error(desc, String.valueOf(code), null);
+                }
+
+                @Override
+                public void onSuccess(TIMMessage msg) {//发送消息成功
+                    Log.e(TAG, "sendOnlineMessage ok");
+                    result.success("sendOnlineMessage ok");
+                }
+            });
+        }else if (call.method.equals("sendImageMessages")) {
             String identifier = call.argument("identifier");
             String iamgePath = call.argument("image_path");
             //构造一条消息

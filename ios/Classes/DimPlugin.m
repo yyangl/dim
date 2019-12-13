@@ -131,6 +131,27 @@
         } fail:^(int code, NSString *msg) {
             result([NSString stringWithFormat:@"send message failed. code: %d desc:%@", code, msg]);
         }];
+    }else if([@"sendOnlineMessage" isEqualToString:call.method]) {
+        NSString *identifier = call.arguments[@"identifier"];
+        NSString *content = call.arguments[@"content"];
+        TIMMessage *msg = [TIMMessage new];
+        
+        //添加文本内容
+        TIMTextElem *elem = [TIMTextElem new];
+        elem.text = content;
+        
+        //将elem添加到消息
+        if([msg addElem:elem] != 0){
+            NSLog(@"addElement failed");
+            return;
+        }
+        TIMConversation *conversation = [[TIMManager sharedInstance] getConversation:TIM_C2C receiver:identifier];
+        //发送消息
+        [conversation sendOnlineMessage:msg succ:^{
+            result(@"send message ok");
+        } fail:^(int code, NSString *msg) {
+            result([NSString stringWithFormat:@"send message failed. code: %d desc:%@", code, msg]);
+        }];
     }else if([@"sendImageMessages" isEqualToString:call.method]){
         NSString *identifier = call.arguments[@"identifier"];
         NSString *iamgePath = call.arguments[@"image_path"];
